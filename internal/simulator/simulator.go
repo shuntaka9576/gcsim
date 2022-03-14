@@ -17,6 +17,7 @@ import (
 	"github.com/genshinsim/gcsim/pkg/result"
 	"github.com/genshinsim/gcsim/pkg/simulation"
 	"github.com/genshinsim/gcsim/pkg/worker"
+	"github.com/k0kubun/pp/v3"
 )
 
 //Options sets out the settings to run the sim by (such as debug mode, etc..)
@@ -51,6 +52,7 @@ func RunWithConfig(cfg string, simcfg core.SimulationConfig, opts Options) (resu
 	//set up a pool
 	respCh := make(chan simulation.Result)
 	errCh := make(chan error)
+	pp.Println("NumberOfWorkers", simcfg.Settings.NumberOfWorkers)
 	pool := worker.New(simcfg.Settings.NumberOfWorkers, respCh, errCh)
 
 	//spin off a go func that will queue jobs for as long as the total queued < iter
@@ -76,6 +78,7 @@ func RunWithConfig(cfg string, simcfg core.SimulationConfig, opts Options) (resu
 	for count > 0 {
 		select {
 		case r := <-respCh:
+			// default 1000回の試行データresp channelを経由して追加される
 			results = append(results, r)
 			count--
 		case err := <-errCh:
